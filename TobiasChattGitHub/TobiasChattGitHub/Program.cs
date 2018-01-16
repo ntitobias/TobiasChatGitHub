@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace TobiasChattGitHub
@@ -17,6 +18,29 @@ namespace TobiasChattGitHub
 
         static void Main(string[] args)
         {
+            //Skapa och starta en tråd som körs samtidigt med resten av programmet
+            var listenThread = new Thread(Listener);
+            listenThread.Start();
+
+            //Skapa en anslutning för att kunna skicka meddelanden
+            Socket socket = new Socket(AddressFamily.InterNetwork, 
+                SocketType.Dgram, ProtocolType.Udp);
+            socket.EnableBroadcast = true;
+            IPEndPoint ep = new IPEndPoint(IPAddress.Broadcast, ListenPort);
+
+            Thread.Sleep(1000);
+
+            while(true)
+            {
+                Console.Write(">");
+                string msg = Console.ReadLine();
+
+                byte[] sendbuf = Encoding.UTF8.GetBytes(msg);
+                socket.SendTo(sendbuf, ep);
+
+                Thread.Sleep(200);
+            }
+
 
         }
 
